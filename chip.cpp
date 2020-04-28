@@ -12,7 +12,12 @@ std::string chip::unpack(const pack &in)
 		out += std::to_string(counter++) + ":\t[";
 		for (auto i : row)
 			out += (i ? "1" : "0");
-		out += "]\n";
+
+		out += "]";
+		if (counter == in.size())
+			break;
+
+		out += "\n";
 	}
 
 	return out;
@@ -24,6 +29,49 @@ chip::chip(const specs &in, const specs &out, const circuit &c)
 	functor = c;
 }
 
+size_t chip::pins() const
+{
+	size_t counter = 0;
+
+	for (size_t i : input)
+		counter += i;
+
+	for (size_t i : output)
+		counter += i;
+
+	return counter;
+}
+
+size_t chip::pins_in() const
+{
+	size_t counter = 0;
+
+	for (size_t i : input)
+		counter += i;
+
+	return counter;
+}
+
+size_t chip::pins_out() const
+{
+	size_t counter = 0;
+
+	for (size_t i : output)
+		counter += i;
+
+	return counter;
+}
+
+const specs &chip::specs_in() const
+{
+	return input;
+}
+
+const specs &chip::specs_out() const
+{
+	return output;
+}
+
 const pack &chip::operator()(const pack &in) const
 {
         if (type != l_immediate) {
@@ -31,10 +79,10 @@ const pack &chip::operator()(const pack &in) const
                 return in;
         }
 
-        pack *out = new pack(input.size());
+        pack *out = new pack(output.size());
 
-        for (size_t i = 0; i < out->size(); i++)
-                out[i].assign(input[i], row(input[i]));
+        for (size_t i = 0; i < output.size(); i++)
+                (*out)[i].assign(output[i], false);
 
         functor(in, *out);
 

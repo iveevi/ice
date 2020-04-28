@@ -45,6 +45,13 @@ public:
 
 	chip(const specs &, const specs &, const circuit &);
 
+	size_t pins() const;
+	size_t pins_in() const;
+	size_t pins_out() const;
+
+	const specs &specs_in() const;
+	const specs &specs_out() const;
+
 	const pack &operator()(const pack &) const;
 };
 

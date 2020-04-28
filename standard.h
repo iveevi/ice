@@ -1,3 +1,6 @@
+#ifndef STANDARD_H_
+#define STANDARD_H_
+
 #include "chip.h"
 
 /* This file contains common
@@ -8,9 +11,14 @@
  * level chips or the chip they want
  * to make itself. */
 
-chip __and({1, 1}, {1}, [](const pack &in, pack &out) {
-        out[0][0] = in[0][0] & in[1][0];
-});
-
 namespace std_chips {
+	chip __and({2}, {1}, [](const pack &in, pack &out) {
+		out[0][0] = in[0][0] & in[0][1];
+	});
+
+	chip __or({2}, {1}, [](const pack &in, pack &out) {
+		out[0][0] = in[0][0] | in[0][1];
+	});
 }
+
+#endif
