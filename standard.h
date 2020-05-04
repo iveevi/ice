@@ -12,11 +12,15 @@
  * to make itself. */
 
 namespace std_chips {
-	chip __and({2}, {1}, [](const pack &in, pack &out) {
+	chip __not({1}, {1}, [](const pack_t &in, pack_t &out) {
+		out[0][0] = !in[0][0];
+	});
+
+	chip __and({2}, {1}, [](const pack_t &in, pack_t &out) {
 		out[0][0] = in[0][0] & in[0][1];
 	});
 
-	chip __or({2}, {1}, [](const pack &in, pack &out) {
+	chip __or({2}, {1}, [](const pack_t &in, pack_t &out) {
 		out[0][0] = in[0][0] | in[0][1];
 	});
 }

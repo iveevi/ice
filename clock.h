@@ -8,7 +8,7 @@ namespace std_seq_chips {
 
 	template <int millis>
 	const chip &__make_clock() {
-		chip *__clk_ptr = new chip({0}, {1}, [](const pack &in, pack &out) {
+		chip *__clk_ptr = new chip({0}, {1}, [](const pack_t &in, pack_t &out) {
 			out[0][0] = (clock() % (millis * CLOCKS_PER_SEC / 1000) == 0);
 		});
 

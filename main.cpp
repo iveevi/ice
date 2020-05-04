@@ -6,6 +6,7 @@
 #include "chip.h"
 #include "clock.h"
 #include "standard.h"
+#include "aug_chip.h"
 
 #define DELAY 100
 
@@ -14,11 +15,11 @@ using namespace std;
 using namespace std_chips;
 using namespace std_seq_chips;
 
-vector <chip> coll = {__and, __or};
+vector <chip> coll = {__not, __and, __or};
 
-vector <string> corr = {"AND", "OR"};
+vector <string> corr = {"NOT", "AND", "OR"};
 
-bool increment(pack &ins)
+bool increment(pack_t &ins)
 {
 	size_t i = 0;
 	size_t j = 0;
@@ -45,7 +46,7 @@ bool increment(pack &ins)
 	return true;
 }
 
-void process_raw(const chip &cp, const pack &ins)
+void process_raw(const chip &cp, const pack_t &ins)
 {
 	for (size_t i = 0; i < ins.size(); i++) {
 		for (size_t j = 0; j < ins[i].size(); j++)
@@ -54,7 +55,7 @@ void process_raw(const chip &cp, const pack &ins)
 	
 	cout << "|";
 
-	pack out = cp(ins);
+	pack_t out = cp(ins);
 
 	for (size_t i = 0; i < out.size(); i++) {
 		for (size_t j = 0; j < out[i].size(); j++)
@@ -64,7 +65,7 @@ void process_raw(const chip &cp, const pack &ins)
 	cout << endl;
 }
 
-void process_packed(const chip &cp, const pack &ins)
+void process_pack_ted(const chip &cp, const pack_t &ins)
 {
 	for (size_t i = 0; i < ins.size(); i++) {
 		cout << "[";
@@ -75,7 +76,7 @@ void process_packed(const chip &cp, const pack &ins)
 	
 	cout << "|";
 
-	pack out = cp(ins);
+	pack_t out = cp(ins);
 
 	for (size_t i = 0; i < out.size(); i++) {
 		cout << "[";
@@ -98,7 +99,7 @@ void process(size_t i)
 
 	specs input = coll[i].specs_in();
 
-        pack ins = pack(input.size());
+        pack_t ins = pack_t(input.size());
 
 	bool ok;
 
@@ -119,15 +120,45 @@ void process(size_t i)
                 ins[i].assign(input[i], false);
 
 	do {
-		process_packed(coll[i], ins);
+		process_pack_ted(coll[i], ins);
 		ok = increment(ins);
 	} while (ok);
 
 	cout << endl;
 }
 
+struct __dff_mem {
+	bool prev;
+	chip __clk;
+};
+
 int main()
 {
 	for (size_t i = 0; i < coll.size(); i++)
 		process(i);
+
+	aug_chip <__dff_mem> __dff({1}, {1}, [&](const pack_t &in, pack_t &out, __dff_mem &data) {
+			out[0][0] = false;
+
+			if (data.__clk({})[0][0]) {
+				out[0][0] = data.prev;
+				data.prev = in[0][0];
+			}
+	}, {false, __make_clock <100> ()});
+
+	srand(clock());
+
+	int sig;
+
+	cout << "Enter signal: ";
+	cin >> sig;
+
+	pack_t ins = {{sig % 2}};
+
+	cout << "CPS " << CLOCKS_PER_SEC << endl;
+	while (true) {
+		if (__dff(ins)[0][0]) {
+			cout << "SENT SIGNAL @ " << clock() << endl;
+		}
+	}
 }

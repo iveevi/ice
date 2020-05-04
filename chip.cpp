@@ -2,7 +2,7 @@
 
 #include "chip.h"
 
-std::string chip::unpack(const pack &in)
+std::string chip::unpack(const pack_t &in)
 {
 	std::string out;
 
@@ -22,6 +22,9 @@ std::string chip::unpack(const pack &in)
 
 	return out;
 }
+
+chip::chip(const specs &in, const specs &out)
+	: input(in), output(out) {}
 
 chip::chip(const specs &in, const specs &out, const circuit &c)
 	: input(in), output(out), type(l_immediate)
@@ -72,14 +75,14 @@ const specs &chip::specs_out() const
 	return output;
 }
 
-const pack &chip::operator()(const pack &in) const
+const pack_t &chip::operator()(const pack_t &in) const
 {
         if (type != l_immediate) {
                 std::cout << "[CHIP]: Only immediate modes are available." << std::endl;
                 return in;
         }
 
-        pack *out = new pack(output.size());
+        pack_t *out = new pack_t(output.size());
 
         for (size_t i = 0; i < output.size(); i++)
                 (*out)[i].assign(output[i], false);

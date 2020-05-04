@@ -6,10 +6,10 @@
 #include <string>
 #include <vector>
 
-typedef std::vector <std::vector <bool>> pack;
+typedef std::vector <std::vector <bool>> pack_t;
 typedef std::vector <bool> row;
 typedef std::vector <size_t> specs;
-typedef std::function <void (const pack &, pack &)> circuit;
+typedef std::function <void (const pack_t &, pack_t &)> circuit;
 
 /**
  * @brief Represents an
@@ -30,19 +30,20 @@ public:
 		circuit transformer;
 	};
 
-	static std::string unpack(const pack &);
-private:
+	static std::string unpack(const pack_t &);
+protected:
 	specs input;
 	specs output;
 
+private:
 	label type;
-
 	node *graph;
 	
 	circuit functor;
 public:
 	chip(const std::string &);
 
+	chip(const specs &, const specs &);
 	chip(const specs &, const specs &, const circuit &);
 
 	size_t pins() const;
@@ -52,7 +53,7 @@ public:
 	const specs &specs_in() const;
 	const specs &specs_out() const;
 
-	const pack &operator()(const pack &) const;
+	const pack_t &operator()(const pack_t &) const;
 };
 
 #endif
