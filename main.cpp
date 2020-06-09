@@ -1,10 +1,12 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
+#include <thread>
 
 #include <cmath>
 
 #include "chip.h"
-#include "clock.h"
+#include "sequential.h"
 #include "standard.h"
 #include "aug_chip.h"
 
@@ -12,10 +14,10 @@
 
 using namespace std;
 
-using namespace std_chips;
-using namespace std_seq_chips;
+using namespace combinational;
+using namespace sequential;
 
-vector <chip> coll = {__not, __and, __or};
+vector <chip> coll = {__not(), __and(), __or()};
 
 vector <string> corr = {"NOT", "AND", "OR"};
 
@@ -129,7 +131,26 @@ void process(size_t i)
 
 struct __dff_mem {
 	bool prev;
-	chip __clk;
+	bool go;
+	bool started;
+	thread timer;
+
+	__dff_mem() : prev(false), go(true), started(false)
+	{
+		timer = thread([&] {
+			while (true) {
+				go = false;
+				this_thread::sleep_for(chrono::milliseconds(1000));
+				go = true;
+				this_thread::sleep_for(chrono::milliseconds(1000));
+			}
+		});
+	}
+	
+
+	~__dff_mem() {
+		timer.detach();
+	}
 };
 
 int main()
@@ -137,28 +158,33 @@ int main()
 	for (size_t i = 0; i < coll.size(); i++)
 		process(i);
 
-	aug_chip <__dff_mem> __dff({1}, {1}, [&](const pack_t &in, pack_t &out, __dff_mem &data) {
-			out[0][0] = false;
+	aug_chip <__dff_mem *> __dff("dff", {1}, {1}, [&](const pack_t &in, pack_t &out, __dff_mem* data) {
+		out[0][0] = false;
 
-			if (data.__clk({})[0][0]) {
-				out[0][0] = data.prev;
-				data.prev = in[0][0];
-			}
-	}, {false, __make_clock <100> ()});
+		if (data->go) {
+			out[0][0] = data->prev;
+			data->prev = in[0][0];
+		}
+	}, new __dff_mem());
 
 	srand(clock());
 
 	int sig;
 
-	cout << "Enter signal: ";
+	/* cout << "Enter signal: ";
 	cin >> sig;
 
 	pack_t ins = {{sig % 2}};
 
 	cout << "CPS " << CLOCKS_PER_SEC << endl;
+
+	clk <1000> one;
 	while (true) {
-		if (__dff(ins)[0][0]) {
-			cout << "SENT SIGNAL @ " << clock() << endl;
-		}
-	}
+		if (one())
+			cout << "ON @ " << clock() << endl;
+	} */
+
+	__and nd = __and();
+
+	cout << nd.print({{1, 1}}) << endl;
 }

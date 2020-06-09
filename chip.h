@@ -11,6 +11,32 @@ typedef std::vector <bool> row;
 typedef std::vector <size_t> specs;
 typedef std::function <void (const pack_t &, pack_t &)> circuit;
 
+/* Display Examples (ASCII)
+
+   +-----+
+   |     |
+1 -+     |
+   | and +- 1
+1 -+     |
+   |     |
+   +-----+
+   
+   +----+
+   |    |
+0 -+    |
+   | or +- 1
+1 -+    |
+   |    |
+   +----+
+   
+   +-----+
+   |     |
+1 -+ not +- 0
+   |     |
+   +-----+
+
+*/
+
 /**
  * @brief Represents an
  * arbitrary chip, with
@@ -37,14 +63,17 @@ protected:
 
 private:
 	label type;
+
 	node *graph;
 	
 	circuit functor;
+
+	std::string name;
 public:
 	chip(const std::string &);
 
-	chip(const specs &, const specs &);
-	chip(const specs &, const specs &, const circuit &);
+	chip(const std::string &, const specs &, const specs &);
+	chip(const std::string &, const specs &, const specs &, const circuit &);
 
 	size_t pins() const;
 	size_t pins_in() const;
@@ -53,6 +82,9 @@ public:
 	const specs &specs_in() const;
 	const specs &specs_out() const;
 
+	std::string print(const pack_t &) const;
+
+	const pack_t &get(const pack_t &) const;
 	const pack_t &operator()(const pack_t &) const;
 };
 

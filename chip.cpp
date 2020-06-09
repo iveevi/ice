@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 
 #include "chip.h"
 
@@ -23,11 +24,11 @@ std::string chip::unpack(const pack_t &in)
 	return out;
 }
 
-chip::chip(const specs &in, const specs &out)
-	: input(in), output(out) {}
+chip::chip(const std::string &str, const specs &in, const specs &out)
+	: name(str), input(in), output(out) {}
 
-chip::chip(const specs &in, const specs &out, const circuit &c)
-	: input(in), output(out), type(l_immediate)
+chip::chip(const std::string &str, const specs &in, const specs &out, const circuit &c)
+	: name(str), input(in), output(out), type(l_immediate)
 {
 	functor = c;
 }
@@ -73,6 +74,38 @@ const specs &chip::specs_in() const
 const specs &chip::specs_out() const
 {
 	return output;
+}
+
+std::string chip::print(const pack_t &in) const
+{
+	std::ostringstream oss;
+
+	pack_t out = get(in);
+
+	size_t len = name.length() + 2;
+
+	oss << '+' << std::string(len, '-') << '+' << std::endl;
+	oss << "| " << name << " |" << std::endl;
+	oss << '+' << std::string(len, '-') << '+';
+
+	return oss.str();
+}
+
+const pack_t &chip::get(const pack_t &in) const
+{
+        if (type != l_immediate) {
+                std::cout << "[CHIP]: Only immediate modes are available." << std::endl;
+                return in;
+        }
+
+        pack_t *out = new pack_t(output.size());
+
+        for (size_t i = 0; i < output.size(); i++)
+                (*out)[i].assign(output[i], false);
+
+        functor(in, *out);
+
+        return *out;
 }
 
 const pack_t &chip::operator()(const pack_t &in) const

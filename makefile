@@ -1,5 +1,5 @@
-tests: build
-	g++ -std=c++11 chip.cpp main.cpp -g -o build/tests
+chips:	build
+	g++ -std=c++11 chip.cpp main.cpp -lpthread -g -o build/chips
 
 build:
 	mkdir build
